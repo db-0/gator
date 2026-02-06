@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/db-0/gator/internal/config"
 )
@@ -19,10 +20,30 @@ func main() {
 		log.Fatalf("couldn't set current user: %v", err)
 	}
 
-	cfg, err = config.Read()
-	if err != nil {
-		log.Fatalf("error reading configuration file: %v", err)
+	programState := &state{
+		cfg: &cfg,
 	}
 
-	fmt.Printf("Read configuration file again: %+v\n", cfg)
+	programCmds := commands{
+		registeredCmds: make(map[string]func(*state, command) error),
+	}
+
+	programCmds.register("login", handlerLogin)
+
+	if len(os.Args) < 2 {
+		log.Fatalf("not enough arguments")
+	}
+
+	programArgs := os.Args[1:]
+
+	cmd := command{
+		name: programArgs[0],
+		args: programArgs[1:],
+	}
+
+	err = programCmds.run(programState, cmd)
+	if err != nil {
+		log.Fatalf("error running command: %v", err)
+	}
+
 }

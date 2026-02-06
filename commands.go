@@ -17,27 +17,32 @@ type command struct {
 }
 
 type commands struct {
-	cmds map[string]func(*state, command) error
+	registeredCmds map[string]func(*state, command) error
 }
 
 func handlerLogin(s *state, cmd command) error {
-	if len(cmd.args) == 0 {
-		return errors.New("the login command requires a username argument")
+	if len(cmd.args) != 1 {
+		return fmt.Errorf("Usage: %s <name>", cmd.name)
 	}
 
 	err := s.cfg.SetUser(cmd.args[0])
 	if err != nil {
-		return err
+		return fmt.Errorf("couldn't set current user: %w", err)
 	}
 
-	fmt.Printf("Current username has been set to: %v", cmd.args[0])
+	fmt.Printf("Current username has been set to: %v\n", cmd.args[0])
 	return nil
 }
 
 func (c *commands) run(s *state, cmd command) error {
-	return nil
+	cmdFunc, ok := c.registeredCmds[cmd.name]
+	if !ok {
+		return errors.New("command not found")
+	}
+
+	return cmdFunc(s, cmd)
 }
 
 func (c *commands) register(name string, f func(*state, command) error) {
-
+	c.registeredCmds[name] = f
 }
