@@ -5,9 +5,11 @@ import (
 	"fmt"
 
 	"github.com/db-0/gator/internal/config"
+	"github.com/db-0/gator/internal/database"
 )
 
 type state struct {
+	db  *database.Queries
 	cfg *config.Config
 }
 
@@ -32,6 +34,14 @@ func handlerLogin(s *state, cmd command) error {
 
 	fmt.Printf("Current username has been set to: %v\n", cmd.args[0])
 	return nil
+}
+
+func handlerRegiser(s *state, cmd command) error {
+	if len(cmd.args) != 1 {
+		return fmt.Errorf("Usage: %s <name>", cmd.name)
+	}
+
+	err := 
 }
 
 func (c *commands) run(s *state, cmd command) error {
