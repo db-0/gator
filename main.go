@@ -1,11 +1,14 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/db-0/gator/internal/config"
+	"github.com/db-0/gator/internal/database"
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -14,6 +17,9 @@ func main() {
 		log.Fatalf("error reading configuration file: %v", err)
 	}
 	fmt.Printf("Read configuration file: %+v\n", cfg)
+
+	db, err := sql.Open("postgres", cfg.DBURL)
+	dbQueries := database.New(db)
 
 	err = cfg.SetUser("dan")
 	if err != nil {
