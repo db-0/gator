@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -36,12 +37,18 @@ func handlerLogin(s *state, cmd command) error {
 	return nil
 }
 
-func handlerRegiser(s *state, cmd command) error {
+func handlerRegister(s *state, cmd command) error {
 	if len(cmd.args) != 1 {
 		return fmt.Errorf("Usage: %s <name>", cmd.name)
 	}
 
-	err := 
+	dbUserParams := 
+	
+	user, err := s.db.CreateUser(context.Background(), )
+	if err != nil {
+		return fmt.Errorf("couldn't create user: %w", err)
+	}
+
 }
 
 func (c *commands) run(s *state, cmd command) error {
