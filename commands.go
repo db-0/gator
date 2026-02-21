@@ -4,9 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
+	"time"
 
 	"github.com/db-0/gator/internal/config"
 	"github.com/db-0/gator/internal/database"
+	"github.com/google/uuid"
 )
 
 type state struct {
@@ -28,7 +31,12 @@ func handlerLogin(s *state, cmd command) error {
 		return fmt.Errorf("Usage: %s <name>", cmd.name)
 	}
 
-	err := s.cfg.SetUser(cmd.args[0])
+	_, err := s.db.GetUser(context.Background(), cmd.args[0])
+	if err != nil {
+		os.Exit(1)
+	}
+
+	err = s.cfg.SetUser(cmd.args[0])
 	if err != nil {
 		return fmt.Errorf("couldn't set current user: %w", err)
 	}
@@ -42,12 +50,25 @@ func handlerRegister(s *state, cmd command) error {
 		return fmt.Errorf("Usage: %s <name>", cmd.name)
 	}
 
-	dbUserParams := 
-	
-	user, err := s.db.CreateUser(context.Background(), )
+	user, err := s.db.CreateUser(context.Background(), database.CreateUserParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
+		Name:      cmd.args[0],
+	})
+
 	if err != nil {
+		os.Exit(1)
 		return fmt.Errorf("couldn't create user: %w", err)
 	}
+
+	err = s.cfg.SetUser(cmd.args[0])
+	if err != nil {
+		return fmt.Errorf("couldn't set current user: %w", err)
+	}
+
+	fmt.Printf("User %s has been created:\n%v\n", cmd.args[0], user)
+	return nil
 
 }
 

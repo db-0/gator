@@ -21,12 +21,8 @@ func main() {
 	db, err := sql.Open("postgres", cfg.DBURL)
 	dbQueries := database.New(db)
 
-	err = cfg.SetUser("dan")
-	if err != nil {
-		log.Fatalf("couldn't set current user: %v", err)
-	}
-
 	programState := &state{
+		db:  dbQueries,
 		cfg: &cfg,
 	}
 
@@ -35,6 +31,7 @@ func main() {
 	}
 
 	programCmds.register("login", handlerLogin)
+	programCmds.register("register", handlerRegister)
 
 	if len(os.Args) < 2 {
 		log.Fatalf("not enough arguments")
