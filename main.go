@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"os"
 
@@ -11,14 +10,23 @@ import (
 	_ "github.com/lib/pq"
 )
 
+type state struct {
+	db  *database.Queries
+	cfg *config.Config
+}
+
 func main() {
 	cfg, err := config.Read()
 	if err != nil {
 		log.Fatalf("error reading configuration file: %v", err)
 	}
-	fmt.Printf("Read configuration file: %+v\n", cfg)
 
 	db, err := sql.Open("postgres", cfg.DBURL)
+	if err != nil {
+		log.Fatalf("error connecting to db: %v", err)
+	}
+	defer db.Close()
+
 	dbQueries := database.New(db)
 
 	programState := &state{
@@ -30,18 +38,18 @@ func main() {
 		registeredCmds: make(map[string]func(*state, command) error),
 	}
 
-	programCmds.register("login", handlerLogin)
 	programCmds.register("register", handlerRegister)
+	programCmds.register("login", handlerLogin)
+	programCmds.register("users", handlerUsers)
+	programCmds.register("reset", handlerReset)
 
 	if len(os.Args) < 2 {
-		log.Fatalf("not enough arguments")
+		log.Fatalf("Usage: gator <command> [args...]")
 	}
 
-	programArgs := os.Args[1:]
-
 	cmd := command{
-		name: programArgs[0],
-		args: programArgs[1:],
+		Name: os.Args[1],
+		Args: os.Args[2:],
 	}
 
 	err = programCmds.run(programState, cmd)
