@@ -42,6 +42,7 @@ func main() {
 	programCmds.register("login", handlerLogin)
 	programCmds.register("users", handlerUsers)
 	programCmds.register("reset", handlerReset)
+	programCmds.register("agg", handlerAgg)
 
 	if len(os.Args) < 2 {
 		log.Fatalf("Usage: gator <command> [args...]")
