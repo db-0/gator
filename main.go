@@ -45,6 +45,8 @@ func main() {
 	programCmds.register("agg", handlerAgg)
 	programCmds.register("addfeed", handlerAddFeed)
 	programCmds.register("feeds", handlerListFeed)
+	programCmds.register("follow", handlerFollow)
+	programCmds.register("following", handlerFollowing)
 
 	if len(os.Args) < 2 {
 		log.Fatalf("Usage: gator <command> [args...]")
